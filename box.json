@@ -1,0 +1,6 @@
+{
+  "files": ["src", "vendor", "config"],
+  "main": "bin/agent",
+  "output": "miniagent.phar",
+  "stub": true
+}
