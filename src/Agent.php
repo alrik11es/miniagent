@@ -93,7 +93,16 @@ class Agent {
     private function parseConfig($config)
     {
         $dnp = \Alr\ObjectDotNotation\Data::load($config);
-        if(!empty($dnp->get('config.port'))) $this->config->port = $dnp->get('config.port');
+        $get_fields = [
+            'config.port',
+            'config.certificate'
+        ];
+
+        foreach($get_fields as $field) {
+            $arr = explode('.', $field);
+            $varname = end($arr);
+            if(!empty($dnp->get($field))) $this->config->$varname = $dnp->get($field);
+        }
     }
 
     public function isJson($string) {

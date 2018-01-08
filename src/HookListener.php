@@ -1,11 +1,9 @@
 <?php
 namespace MiniAgent;
 
-use MiniAgent\Plugins\IPlugin;
-use Psr\Http\Message\ServerRequestInterface;
-use React\Http\Request;
-use React\Http\Response;
-use React\Http\Server;
+use React\EventLoop\Factory;
+use React\Socket\ConnectionInterface;
+use React\Socket\Server;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,42 +32,22 @@ class HookListener
 
     public function startup()
     {
-        $loop = \React\EventLoop\Factory::create();
+        $loop = Factory::create();
 
-//        $server = new Server(function (ServerRequestInterface $request) use ($loop) {
-//
-//
-//
-//
-//            $process = new \React\ChildProcess\Process('echo foo');
-//            $process->start($loop);
-//
-//            $process->stdout->on('data', function ($chunk) {
-//                echo $chunk;
-//            });
-//
-//
-////            $params = $request->getQueryParams();
-//
-////            if($request->getUri() == 'command' && $params['command']){
-////
-////            }
-//
-//
-//            return new Response(
-//                200,
-//                array(
-//                    'Content-Type' => 'text/plain'
-//                ),
-//                "Hello World!\n"
-//            );
-//
-//
-//        });
+        $tls_config = array(
+            'tls' => array(
+                'local_cert' => file_exists($this->config->certificate) ? $this->config->certificate : '',
+            )
+        );
 
-        $socket = new \React\Socket\Server($this->config->port, $loop);
-//        $server->listen($socket);
+        $server = new Server($this->config->port, $loop, $tls_config);
+        $server->on('connection', function (ConnectionInterface $conn) {
+            echo '[' . $conn->getRemoteAddress() . ' connected]' . PHP_EOL;
+            $conn->pipe($conn);
+        });
 
+        $server->on('error', 'printf');
+        echo 'Listening on ' . $server->getAddress() . PHP_EOL;
         $loop->run();
 
     }
