@@ -1,5 +1,6 @@
 {
   "config":{
-    "port": "1234"
+    "port": "1234",
+    "certificate": "config/cert.pem"
   }
 }
